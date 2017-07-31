@@ -1,12 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>恋爱笔记</title>
-</head>
-<body>
-    <div>
-        <h1>我的恋爱笔记第一章</h1>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>恋爱日记</title>
+    <link href={{ url_for("static",filename="css/bootstrap.min.css")}} rel="stylesheet">
+  </head>
+  <body>
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+          <div class="navbar-header">
+              <button class="navbar-toggle collapsed" type="button" data-toggle="collapse"
+                      data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                  <span class="sr-only">Toggle Template</span>
+                  <span class=" icon-bar"></span>
+                  <span class=" icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">恋爱日记</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
+              <ul class="nav navbar-nav" id="menus" style="display:none">
+                  <li class="active">
+                      <a href="/logger">爱情笔记</a>
+                  </li>
+                  <li>
+                      <a href="/about">关于爱情</a>
+                  </li>
+                  <li>
+                      <a href="/picture">爱情照片</a>
+                  </li>
+              </ul>
+              <div class="nav navbar-right" id="menu_login">
+                  <ul class="nav navbar-nav">
+                      <li>
+                          <a href="#" data-toggle="modal" data-target="#myLogin">登录</a>
+                      </li>
+                      <li>
+                          <a href="#" data-toggle="modal" data-target="#myRegister">注册</a>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </nav>
+
+  <!-- 登录模态框（Modal） -->
+    <div class="modal fade" id="myLogin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-title">
+                    <h3 class="text-center">登录</h3>
+                </div>
+                <div class="modal-body" action="">
+                    <form class="form-group">
+                        <div class="form-froup">
+                            <label for="username">用户名</label>
+                            <input id="username" name="username" type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input id="password" name="password" type="password" class="form-control">
+                        </div>
+                        <div class="text-right">
+                            <button id="login" type="button" class="btn btn-primary" onclick="userLogin()">登录</button>
+                            <button id="exit" type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        </div>
+                        <a href="#" data-toggle="modal" data-target="#myRegister" data-dismiss="modal">还没有账号？点我注册</a>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
+
+  <!-- 注册模态框（Modal） -->
+    <div class="modal fade" id="myRegister" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-title">
+                    <h3 class="text-center">注册</h3>
+                </div>
+                <div class="modal-body" action="">
+                    <form class="form-group">
+                        <div class="form-froup">
+                            <label for="registername">用户名</label>
+                            <input id="registername" name="registername" type="text" class="form-control" placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerpassword">密码</label>
+                            <input id="registerpassword" name="registerpassword" type="password" class="form-control" placeholder="请输入密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerpasswordagine">再次输入密码</label>
+                            <input id="registerpasswordagine" name="registerpasswordagine" type="password" class="form-control" placeholder="请再次输入密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">邮箱</label>
+                            <input id="email" name="email" type="text" class="form-control" placeholder="请输入邮箱">
+                        </div>
+                        <div class="text-right">
+                            <button id="register" type="button" class="btn btn-primary" onclick="userRegister()">注册</button>
+                            <button id="exit" type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        </div>
+                        <a href="#" data-toggle="modal" data-target="#myLogin" data-dismiss="modal">已有账号？点我登录</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src={{ url_for("static",filename="js/jquery-3.2.1.min.js")}}></script>
+    <script src={{ url_for("static",filename="js/bootstrap.min.js")}}></script>
+    <script type="text/javascript">
+        //用户登录
+        function userLogin(){
+            var username = $("#username").val();
+            var password = $("#password").val();
+            if(username.length == 0 || password.length == 0){
+                alert("用户名或密码不能为空!");
+                return false;
+            }
+            $.ajax({
+                url:"/login",
+                method:'post',
+                async:true,
+                data:{'username':username,'password':password},
+                timeout:5000,
+                dataType:'json',
+                success:function(data){
+                    var flag = data.flag;
+                    if(flag != 1){
+                        alert('用户登录失败！');
+                        return false;
+                    }
+                    //关闭模态框
+                    $("#myLogin").modal("hide");
+                    $("#menus").show();
+                    $("#menu_login").hide();
+                    return true;
+                },
+                error:function(){
+                    $("#myLogin").modal("hide");
+                    alert("服务器出错!");
+                    return false;
+                },
+                });
+        }
+
+        //用户注册
+        function userRegister(){
+            var username = $("#registername").val();
+            var password = $("#registerpassword").val();
+            var passwordagine = $("#registerpasswordagine").val();
+            var email = $("#email").val();
+            if(username.length == 0 || password.length == 0 || passwordagine == 0){
+                alert("用户名或密码不能为空!");
+                return false;
+            }
+            if(password != passwordagine){
+                alert("两次密码输入不一致!")
+                return false;
+            }
+            $.ajax({
+                url:"/register",
+                method:'post',
+                async:true,
+                data:{'username':username,'password':password,"email":email},
+                timeout:5000,
+                dataType:'json',
+                success:function(data){
+                    var flag = data.flag;
+                    if(flag != 1){
+                        $("#myRegister").modal("hide");
+                        alert('用户注册失败！');
+                        return false;
+                    }
+                    alert("用户注册成功！");
+                    $("#myRegister").modal("hide");
+                    $("#myLogin").modal("show");
+                    return true;
+                },
+                error:function(){
+                    $("#myRegister").modal("hide");
+                    alert("服务器出错!");
+                    return false;
+                },
+                });
+        }
+    </script>
+  </body>
 </html>
