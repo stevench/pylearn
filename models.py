@@ -1,8 +1,9 @@
 #-*- encoding:utf-8 -*-
-from sqlalchemy import Column,Integer,String
+from sqlalchemy import Column,Integer,String,DateTime,TEXT,ForeignKey
 from database import Base
 from werkzeug.security import check_password_hash,generate_password_hash
 
+#2017-07-27实现用户操作的model
 class User(Base):
     __tablename__ = 'user'
 
@@ -24,3 +25,24 @@ class User(Base):
 
     def __repr__(self):
         return "<User: %r >"%(self.name)
+
+
+#2017-07-31实现日记记录的model
+class Logger(Base):
+    __tablename__ = 'logger'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    title = Column(String(20), unique=False, nullable=True)
+    forwho = Column(String(20), nullable=True)
+    content = Column(TEXT, nullable=True)
+    date = Column(DateTime,nullable=True)
+    user = Column(Integer,ForeignKey('user.id'),nullable=False)
+
+    def __init__(self, title, forwho, content,date):
+        self.title = title
+        self.forwho = forwho
+        self.content = content
+        self.date = date
+
+    def __repr__(self):
+        return "<User: %r >" % (self.title)

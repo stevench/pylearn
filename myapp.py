@@ -1,12 +1,15 @@
 #-*- encoding:utf-8 -*-
 from flask import Flask,render_template,request,session,redirect,flash,abort,jsonify
+from flask_bootstrap import Bootstrap
 from database import db_session
-from models import User
+from models import User,Logger
 #from nav import nav
 
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = 'you never guess it'
+
+bootstrap = Bootstrap(app)
 
 #nav.init_app(app)
 
@@ -18,7 +21,7 @@ def shutdown_session(exception=None):
 @app.route('/',methods=['GET'])
 @app.route('/home',methods=['GET'])
 def home():
-    return render_template("index.html",login=False)
+    return render_template("index.html")
 
 @app.route('/login',methods=['POST'])
 def login():
@@ -27,6 +30,7 @@ def login():
     if username and password:
         user = User.query.filter(User.name==username).first()
         if user is not None and user.check_password(password):
+            session['userId'] = user.id
             session['username'] = username
             session['login'] = True
             return jsonify({'flag':1})
@@ -52,9 +56,25 @@ def register():
 def about():
     return 'about'
 
-@app.route('/logger',methods=['GET','POST'])
-def log():
-    return 'logger'
+@app.route('/getLog',methods=['GET'])
+def getLog():
+    userId = session.get('userId')
+    loggers = Logger.query.filter(Logger.user==userId).all()
+    logger_lst = [{'id':logger.id,'title':logger.title,'forwho':logger.forwho,'content':logger.content,'date':logger.date} for logger in loggers]
+    return jsonify({'loggers':logger_lst})
+
+@app.route('/addLog',methods=['POST'])
+def addLog():
+    title = request.form.get('title')
+    forwho = request.form.get('forwho')
+    content = request.form.get('content')
+    date = request.form.get('date')
+    user = session.get("userId")
+    logger = Logger(title,forwho,content,date,user)
+    db_session.add(logger)
+    db_session.commit(logger)
+    return '1'
+
 
 @app.route('/picture',methods=['GET','POST'])
 def picture():
